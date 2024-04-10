@@ -163,6 +163,7 @@ message(STATUS "Cuda version found: ${CUDA_VERSION_STRING}")
 #  message(AUTHOR_WARNING "Cuda >=12.4 is advised for bf16 support.")
 #ENDIF(CUDA_VERSION < 12.4)
 
+# Select whether to use NVRTC or NVCC to generate PTX
 # If NVRTC was enabled/disabled, reset OPTIXIR/PTX to default
 # This code looks funny, but CMake doesn't have an equality operator for boolean types
 # (only integer and string). By doing NOT NOT VAL, you can force the original value into 0
@@ -213,6 +214,11 @@ else()
   option( SAMPLES_INPUT_GENERATE_OPTIXIR "Generate Optix-IR OptiX shaders" OFF )
   option( SAMPLES_INPUT_GENERATE_PTX "Generate PTX OptiX shaders" ON )
 endif()
+
+if( NOT SAMPLES_INPUT_ENABLE_OPTIXIR_SUPPORT AND SAMPLES_INPUT_GENERATE_OPTIXIR )
+  message( SEND_ERROR "Must enable SAMPLES_INPUT_ENABLE_OPTIXIR_SUPPORT to enable SAMPLES_INPUT_GENERATE_OPTIXIR" )
+endif()
+
 
 # FIXME: check if default should not be OFF
 # Determine if we are going to use the static C runtime (CRT) on windows.
@@ -374,12 +380,6 @@ include_directories(
   "${OPTIX_INCLUDE_DIR}"
   "${CMAKE_CURRENT_SOURCE_DIR}/cuda"
   )
-
-# Select whether to use NVRTC or NVCC to generate PTX
-if( NOT SAMPLES_INPUT_ENABLE_OPTIXIR_SUPPORT AND SAMPLES_INPUT_GENERATE_OPTIXIR )
-  message( SEND_ERROR "Must enable SAMPLES_INPUT_ENABLE_OPTIXIR_SUPPORT to enable SAMPLES_INPUT_GENERATE_OPTIXIR" )
-endif()
-
 
 ##################################################################
 # SUtil compilation
