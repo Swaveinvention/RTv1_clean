@@ -29,7 +29,7 @@
 # 2024 Tobias Birnbaum, Swave BV
 #
 # NOTE: Propose Optix distribution location by setting OPTIX_INSTALL_DIR in parent scope prior to calling find_package(OptiX)!
-# Sets OPTIX_INCLUDE, OPTIX_SDK_DIR, OPTIX_VERSION, OPTIX_VERSION_STRING, OPTIX_VERSION_MAJOR, OPTIX_VERSION_MINOR, OPTIX_VERSION_MICRO in parent context.
+# Sets OPTIX_INCLUDE_DIR, OPTIX_SDK_DIR, OPTIX_VERSION, OPTIX_VERSION_STRING, OPTIX_VERSION_MAJOR, OPTIX_VERSION_MINOR, OPTIX_VERSION_MICRO in parent context.
 
 set(OPTIX_INSTALL_DIR_SDK_DEFAULT       "${CMAKE_SOURCE_DIR}/../" CACHE PATH "Path to Optix location, if called from SDK." INTERNAL)
 
@@ -112,7 +112,7 @@ function(OptiX_version_parse optix_header)
 endfunction()
 
 foreach(install_dir IN LISTS install_dir_list)
-    if(DEFINED OPTIX_INCLUDE_DIR AND NOT OPTIX_INCLUDE_DIR)
+    if(NOT DEFINED OPTIX_INCLUDE_DIR OR NOT OPTIX_INCLUDE_DIR)
         message(STATUS "Trying to find Optix in: ${OPTIX_INSTALL_DIR}")
         # Include
         find_path(OPTIX_INCLUDE_DIR
@@ -132,7 +132,7 @@ if(IS_DIRECTORY ${OPTIX_INSTALL_DIR} AND NOT EXISTS "${OPTIX_INSTALL_DIR}/SDK/")
     set(OPTIX_SDK_DIR "${OPTIX_INCLUDE_DIR}/../")
     message(WARNING "OPTIX_INSTALL_DIR has no SDK root, it will be updated to.")
 else()
-    set(OPTIX_SDK_DIR "${OPTIX_INSTALL_DIR}/SDK/")
+    set(OPTIX_SDK_DIR "${OPTIX_INSTALL_DIR}/SDK/" PATH FORCE)
 endif()
 message(STATUS "OPTIX_SDK_DIR set to: ${OPTIX_SDK_DIR}")
 
@@ -143,5 +143,5 @@ else()
     OptiX_version_parse("${OPTIX_INCLUDE_DIR}/optix.h")
     message(STATUS "Optix version found: ${OPTIX_VERSION}")
 
-    set(OPTIX_INSTALL_DIR "${OPTIX_INCLUDE_DIR}/../" PATH FORCE PARENT_SCOPE)
+    set(OPTIX_INSTALL_DIR "${OPTIX_INCLUDE_DIR}/../" PATH FORCE)
 endif()
