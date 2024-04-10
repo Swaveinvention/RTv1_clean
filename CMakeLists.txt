@@ -77,21 +77,26 @@
 # https://devtalk.nvidia.com/default/board/90/
 
 
-# This enforces a particular version of CMake that we require to process the script files
-# properly.  We rely on VERSION_GREATER_EQUAL which requires CMake v. 3.7.
-cmake_minimum_required(VERSION 3.7 FATAL_ERROR)
-set(CMAKE_CXX_STANDARD 11)
+# We rely on VERSION_GREATER_EQUAL which requires CMake v. 3.27 because of better CUDA support.
+cmake_minimum_required(VERSION 3.27 FATAL_ERROR)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # This sets up the name of our project.  For our purposes the main thing this controls is
 # the name of the VS solution file.
-project(OptiX-Samples)
+project(Optix-RTv1)
 
 # As of CMake 2.6 policies were introduced in order to provide a mechanism for
 # adding backwards compatibility one feature at a time.  We will just specify
 # that all policies will use version 2.8.12 semantics.
-cmake_policy(VERSION 2.8.12)
+#cmake_policy(VERSION 2.8.12)
+cmake_policy(VERSION 3.27)
+
+if( POLICY CMP0148 )
+  # FindCuda uses FindPythonInterp, which was deprecated in 3.12
+  cmake_policy(SET CMP0148 OLD)
+endif()
 
 if( POLICY CMP0072 )
   # FindOpenGL prefers GLVND by default when available
