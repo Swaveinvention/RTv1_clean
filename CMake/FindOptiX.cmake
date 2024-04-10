@@ -25,12 +25,29 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
+#
+# NOTE: Propose Optix distribution location by setting OPTIX_INSTALL_DIR in parent scope!
+
+set(OPTIX_INSTALL_DIR_SDK_DEFAULT       "${CMAKE_SOURCE_DIR}/../" CACHE PATH "Path to Optix location, if called from SDK." INTERNAL)
+
+# TODO: Make agnostic for Optix versions. Try to find highest version
+if(WIN32)
+    set(OPTIX_INSTALL_DIR_SYS_DEFAULT    "C:/ProgramData/NVIDIA Corporation/OptiX SDK 8.0.0" CACHE PATH "Path to Optix location, if installed to default location in windows." INTERNAL)
+elseif( APPLE )
+    # FIXME: FIX Linux/MacOS default locations.
+    set(OPTIX_INSTALL_DIR_SYS_DEFAULT    "/usr/local/share/NVIDIA Corporation/OptiX SDK 8.0.0" CACHE PATH "Path to Optix location, if installed to default location in MacOS." INTERNAL)
+else()
+    # FIXME: FIX Linux/MacOS default locations.
+    set(OPTIX_INSTALL_DIR_SYS_DEFAULT    "/usr/local/share/NVIDIA Corporation/OptiX SDK 8.0.0" CACHE PATH "Path to Optix location, if installed to default location in linux." INTERNAL)
+endif()
 
 # Locate the OptiX distribution. Search in OPTIX_INSTALL_DIR first, if unset check relative to CMAKE_SOURCE_DIR.
 if(NOT DEFINED OPTIX_INSTALL_DIR)
     # Assuming that this is called from ROOT CMakeLists.txt in SDK, check there first, if no directory is set.
     set(OPTIX_INSTALL_DIR "${CMAKE_SOURCE_DIR}/../" CACHE PATH "Path to OptiX installed location.")
+    # Make option visible
 endif()
+set(install_dir_list "${OPTIX_INSTALL_DIR};${OPTIX_INSTALL_DIR_SDK_DEFAULT};${OPTIX_INSTALL_DIR_SYS_DEFAULT}")
 
 # The distribution contains only 64 bit libraries. Error when we have been mis-configured.
 if(NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
@@ -49,17 +66,7 @@ else()
   set(bit_dest "")
 endif()
 
-# Include
-find_path(OptiX_INCLUDE
-  NAMES optix.h
-  PATHS "${OPTIX_INSTALL_DIR}/include"
-  NO_DEFAULT_PATH
-  )
-find_path(OptiX_INCLUDE
-  NAMES optix.h
-  )
-
-# Check to make sure we found what we were looking for
+# Helper function: Check to make sure we found what we were looking for
 function(OptiX_report_error error_message required component )
   if(DEFINED OptiX_FIND_REQUIRED_${component} AND NOT OptiX_FIND_REQUIRED_${component})
     set(required FALSE)
@@ -73,6 +80,27 @@ function(OptiX_report_error error_message required component )
   endif()
 endfunction()
 
+
+foreach(install_dir IN LISTS install_dir_list)
+    if(DEFINED OptiX_INCLUDE AND NOT OptiX_INCLUDE)
+        message(STATUS "Trying to find Optix in: ${OPTIX_INSTALL_DIR}")
+        # Include
+        find_path(OptiX_INCLUDE
+          NAMES optix.h
+          PATHS "${install_dir}/include"
+          NO_DEFAULT_PATH
+          )
+        find_path(OptiX_INCLUDE
+          NAMES optix.h
+          )
+    else()
+        continue()
+    endif()
+endforeach()
+
+
 if(NOT OptiX_INCLUDE)
-  OptiX_report_error("OptiX headers (optix.h and friends) not found." TRUE headers )
+    OptiX_report_error("OptiX headers (optix.h and friends) not found." TRUE headers )
+else()
+    message(STATUS "Optix headers found in: ${OptiX_INCLUDE}")
 endif()
