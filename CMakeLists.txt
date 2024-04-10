@@ -434,9 +434,11 @@ configure_file(sampleConfig.h.in sampleConfig.h @ONLY)
 # Path to sutil.h that all the samples need
 include_directories( ${OPTIX_SDK_DIR}
                      "${CMAKE_BINARY_DIR}/include"
-                     ${CMAKE_CURRENT_BINARY_DIR}
+                     ${CMAKE_CURRENT_BINARY_DIR}  # Only needed if called from add_subdirectory
                      ${CUDA_INCLUDE_DIRS}
                      )
+message(TRACE "Current binary dir:  ${CMAKE_CURRENT_BINARY_DIR}")
+message(TRACE "Root binary dir:     ${CMAKE_BINARY_DIR}")
 
 set(SAMPLES_CUDA_DIR ${OPTIX_SDK_DIR}/cuda)
 
@@ -474,8 +476,8 @@ endmacro()
 #########################################################
 # OPTIX_add_sample_executable
 #
-# Convience function for adding samples to the code.  You can copy the contents of this
-# funtion into your individual project if you wish to customize the behavior.  Note that
+# Convenience function for adding samples to the code.  You can copy the contents of this
+# function into your individual project if you wish to customize the behavior.  Note that
 # in CMake, functions have their own scope, whereas macros use the scope of the caller.
 function(OPTIX_add_sample_executable target_name_base target_name_var)
 
