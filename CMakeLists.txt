@@ -45,7 +45,7 @@
 #
 #    b. sutil and putil
 #              - Almost all of the samples make use of this shared code one way or another, so
-#               you should probably keep them until you have your own frameowrk for your
+#               you should probably keep them until you have your own framework for your
 #               code.
 #
 #    d. data  - This directory contains the cow.obj file used as an example for
