@@ -76,10 +76,6 @@
 # If you have any questions, don't feel shy about posting to the OptiX forums:
 # https://devtalk.nvidia.com/default/board/90/
 
-IF(NOT PASSED_FIRST_CONFIGURE)
-  set(OPTIX_SDK_ROOT_DIR "C:/GPUstuff/00_OptiX_SDK_800_clean" CACHE PATH "NVIDIA Optix SDK dir that contains the folders: SDK, doc, include" FORCE)
-ENDIF(NOT PASSED_FIRST_CONFIGURE)
-
 # We rely on VERSION_GREATER_EQUAL which requires CMake v. 3.27 because of better CUDA support.
 cmake_minimum_required(VERSION 3.27 FATAL_ERROR)
 set(CMAKE_CXX_STANDARD 20)
@@ -99,6 +95,12 @@ cmake_policy(VERSION 3.27)
 #  # xxx
 #  cmake_policy(SET CMP0xxx NEW)
 #endif()
+
+IF(NOT PASSED_FIRST_CONFIGURE)
+  set(OPTIX_SDK_ROOT_DIR  "C:/GPUstuff/00_OptiX_SDK_800_clean" CACHE PATH "NVIDIA Optix SDK dir that contains the folders: SDK, doc, include" FORCE)
+  set(OPTIX_BIN_OUT_DIR   "${CMAKE_BINARY_DIR}/bin" CACHE PATH "Output folder for binaries" FORCE)
+  set(OPTIX_LIB_OUT_DIR   "${CMAKE_BINARY_DIR}/lib" CACHE PATH "Output folder for all non-binaries" FORCE)
+ENDIF(NOT PASSED_FIRST_CONFIGURE)
 
 # Add paths to our CMake code to the module path, so they can be found automatically by
 # CMake.
@@ -347,12 +349,15 @@ if(USING_WINDOWS_CL)
   list(APPEND CUDA_NVCC_FLAGS --compiler-options /D_USE_MATH_DEFINES)
 endif()
 
-# Put all the runtime stuff in the same directory.  By default, CMake puts each targets'
+# Put all the runtime stuff in the same directory. By default, CMake puts each targets'
 # output into their own directory.  We want all the targets to be put in the same
 # directory, and we can do this by setting these variables.
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${OPTIX_BIN_OUT_DIR}")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${OPTIX_LIB_OUT_DIR}")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${OPTIX_LIB_OUT_DIR}")
+#set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+#set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
+#set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 
 # Create a flag for mac which will allow apps to add the local cuda toolkit
 # install path to the app's rpath.
