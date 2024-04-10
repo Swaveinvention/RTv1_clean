@@ -25,12 +25,16 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
+
+# 2024 Tobias Birnbaum, Swave BV
 #
 # NOTE: Propose Optix distribution location by setting OPTIX_INSTALL_DIR in parent scope!
+# Sets OPTIX_VERSION, OPTIX_VERSION_STRING, OPTIX_VERSION_MAJOR, OPTIX_VERSION_MINOR, OPTIX_VERSION_MICRO in parent context.
 
 set(OPTIX_INSTALL_DIR_SDK_DEFAULT       "${CMAKE_SOURCE_DIR}/../" CACHE PATH "Path to Optix location, if called from SDK." INTERNAL)
 
 # TODO: Make agnostic for Optix versions. Try to find highest version
+#set(ver_list "8.0;7.7;7.6;7.5;7.4;7.3;7.2;7.1;7.0")
 if(WIN32)
     set(OPTIX_INSTALL_DIR_SYS_DEFAULT    "C:/ProgramData/NVIDIA Corporation/OptiX SDK 8.0.0" CACHE PATH "Path to Optix location, if installed to default location in windows." INTERNAL)
 elseif( APPLE )
@@ -80,6 +84,32 @@ function(OptiX_report_error error_message required component )
   endif()
 endfunction()
 
+# Helper function: Parse Optix version
+# Sets OPTIX_VERSION, OPTIX_VERSION_STRING, OPTIX_VERSION_MAJOR, OPTIX_VERSION_MINOR, OPTIX_VERSION_MICRO in parent context.
+function(OptiX_version_parse optix_header)
+    file(READ ${optix_header} linebuf)
+    string(REGEX MATCH "#define OPTIX_VERSION ([0-9]*)" _ ${linebuf})
+    set(OPTIX_VERSION_STRING ${CMAKE_MATCH_1})
+    math(EXPR major "${OPTIX_VERSION_STRING}/10000")
+    math(EXPR minor "(${OPTIX_VERSION_STRING}%10000)/100")
+    math(EXPR micro "${OPTIX_VERSION_STRING}%100")
+
+    set(OPTIX_VERSION_MAJOR ${major})
+    set(OPTIX_VERSION_MINOR ${minor})
+    set(OPTIX_VERSION_MICRO ${micro})
+
+    message(TRACE "OPTIX_VERSION_STRING: ${OPTIX_VERSION_STRING}")
+    message(TRACE "OPTIX_VERSION_MAJOR:  ${OPTIX_VERSION_MAJOR}")
+    message(TRACE "OPTIX_VERSION_MINOR:  ${OPTIX_VERSION_MINOR}")
+    message(TRACE "OPTIX_VERSION_MICRO:  ${OPTIX_VERSION_MICRO}")
+
+    # "Cmake style return", aka. set variables in parent scope
+    set(OPTIX_VERSION_STRING ${OPTIX_VERSION_STRING} PARENT_SCOPE)
+    set(OPTIX_VERSION_MAJOR ${OPTIX_VERSION_MAJOR} PARENT_SCOPE)
+    set(OPTIX_VERSION_MINOR ${OPTIX_VERSION_MINOR} PARENT_SCOPE)
+    set(OPTIX_VERSION_MICRO ${OPTIX_VERSION_MICRO} PARENT_SCOPE)
+    set(OPTIX_VERSION       ${OPTIX_VERSION_MAJOR}.${OPTIX_VERSION_MINOR}.${OPTIX_VERSION_MICRO} PARENT_SCOPE)
+endfunction()
 
 foreach(install_dir IN LISTS install_dir_list)
     if(DEFINED OptiX_INCLUDE AND NOT OptiX_INCLUDE)
@@ -103,4 +133,6 @@ if(NOT OptiX_INCLUDE)
     OptiX_report_error("OptiX headers (optix.h and friends) not found." TRUE headers )
 else()
     message(STATUS "Optix headers found in: ${OptiX_INCLUDE}")
+    OptiX_version_parse("${OptiX_INCLUDE}/optix.h")
+    message(STATUS "Optix version found: ${OPTIX_VERSION}")
 endif()
