@@ -155,6 +155,10 @@ endif()
 
 # Find at least a 5.0 version of CUDA.
 find_package(CUDA 5.0 REQUIRED)
+message(STATUS "Cuda version found: ${CUDA_VERSION_STRING}")
+#IF(CUDA_VERSION < 12.4)
+#  message(AUTHOR_WARNING "Cuda >=12.4 is advised for bf16 support.")
+#ENDIF(CUDA_VERSION < 12.4)
 
 # If NVRTC was enabled/disabled, reset OPTIXIR/PTX to default
 set( CUDA_NVRTC_ENABLED OFF CACHE BOOL "Use NVRTC to compile OPTIXIR/PTX at run-time instead of NVCC at build-time" )
