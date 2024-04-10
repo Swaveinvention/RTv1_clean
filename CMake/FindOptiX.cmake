@@ -26,12 +26,13 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-# Locate the OptiX distribution.  Search relative to the SDK first, then look in the system.
+# Locate the OptiX distribution. Search in OPTIX_INSTALL_DIR first, if unset check relative to CMAKE_SOURCE_DIR.
+if(NOT DEFINED OPTIX_INSTALL_DIR)
+    # Assuming that this is called from ROOT CMakeLists.txt in SDK, check there first, if no directory is set.
+    set(OPTIX_INSTALL_DIR "${CMAKE_SOURCE_DIR}/../" CACHE PATH "Path to OptiX installed location.")
+endif()
 
-# Our initial guess will be within the SDK.
-set(OptiX_INSTALL_DIR "${CMAKE_SOURCE_DIR}/../" CACHE PATH "Path to OptiX installed location.")
-
-# The distribution contains only 64 bit libraries.  Error when we have been mis-configured.
+# The distribution contains only 64 bit libraries. Error when we have been mis-configured.
 if(NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
   if(WIN32)
     message(SEND_ERROR "Make sure when selecting the generator, you select one with Win64 or x64.")
@@ -51,7 +52,7 @@ endif()
 # Include
 find_path(OptiX_INCLUDE
   NAMES optix.h
-  PATHS "${OptiX_INSTALL_DIR}/include"
+  PATHS "${OPTIX_INSTALL_DIR}/include"
   NO_DEFAULT_PATH
   )
 find_path(OptiX_INCLUDE
@@ -75,4 +76,3 @@ endfunction()
 if(NOT OptiX_INCLUDE)
   OptiX_report_error("OptiX headers (optix.h and friends) not found." TRUE headers )
 endif()
-
