@@ -156,12 +156,15 @@ endif()
 # Find at least a 5.0 version of CUDA.
 find_package(CUDA 5.0 REQUIRED)
 message(STATUS "Cuda version found: ${CUDA_VERSION_STRING}")
-#IF(CUDA_VERSION < 12.4)
+#IF(CUDA_VERSION VERSION_LESS 12.4)
 #  message(AUTHOR_WARNING "Cuda >=12.4 is advised for bf16 support.")
 #ENDIF(CUDA_VERSION < 12.4)
 
 # If NVRTC was enabled/disabled, reset OPTIXIR/PTX to default
-set( CUDA_NVRTC_ENABLED OFF CACHE BOOL "Use NVRTC to compile OPTIXIR/PTX at run-time instead of NVCC at build-time" )
+# This code looks funny, but CMake doesn't have an equality operator for boolean types
+# (only integer and string). By doing NOT NOT VAL, you can force the original value into 0
+# or 1 and allow the EQUAL operator to function correctly.
+set( CUDA_NVRTC_ENABLED OFF CACHE BOOL "Use NVRTC to compile OPTIXIR/PTX at run-time instead of NVCC at build-time. Advised: off" )
 if( NOT ( NOT ( NOT CUDA_NVRTC_ENABLED ) ) EQUAL ( NOT ( NOT CUDA_NVRTC_ENABLED_INTERNAL ) ) )
   message( STATUS "Resetting OPTIXIR/PTX support" )
   unset( SAMPLES_INPUT_ENABLE_OPTIXIR_SUPPORT CACHE )
@@ -190,9 +193,6 @@ else()
   endif()
 endif()
 
-# This code looks funny, but CMake doesn't have an equality operator for boolean types
-# (only integer and string). By doing NOT NOT VAL, you can force the original value into 0
-# or 1 and allow the EQUAL operator to function correctly.
 if( NOT ( NOT ( NOT SAMPLES_INPUT_ENABLE_OPTIXIR_SUPPORT ) ) EQUAL ( NOT ( NOT SAMPLES_INPUT_ENABLE_OPTIXIR_SUPPORT_INTERNAL ) ) )
   message( STATUS "Unsetting values associated with OptiX code generation" )
   # This allows us to reset dependent options if you change it.
@@ -206,6 +206,7 @@ if( SAMPLES_INPUT_ENABLE_OPTIXIR_SUPPORT )
   option( SAMPLES_INPUT_GENERATE_OPTIXIR "Generate Optix-IR OptiX shaders" ON )
   option( SAMPLES_INPUT_GENERATE_PTX "Generate PTX OptiX shaders" OFF )
 else()
+  message( AUTHOR_WARNING "SAMPLES_INPUT_ENABLE_OPTIXIR_SUPPORT = ON is advised.")
   option( SAMPLES_INPUT_GENERATE_OPTIXIR "Generate Optix-IR OptiX shaders" OFF )
   option( SAMPLES_INPUT_GENERATE_PTX "Generate PTX OptiX shaders" ON )
 endif()
