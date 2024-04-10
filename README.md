@@ -1,0 +1,3 @@
+- Optix 8.0.0 cleanup
+- No RTv1 added yet
+- Minimal Optix data added to repository
