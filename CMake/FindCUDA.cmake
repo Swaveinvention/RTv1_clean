@@ -498,9 +498,10 @@ option(CUDA_BUILD_EMULATION "Build in Emulation mode" OFF)
 # Enable batch builds
 option(CUDA_ENABLE_BATCHING "Compile CUDA source files in parallel" OFF)
 if(CUDA_ENABLE_BATCHING)
-  find_package(PythonInterp)
-  if(NOT PYTHONINTERP_FOUND)
-    message(SEND_ERROR "CUDA_ENABLE_BATCHING is enabled, but python wasn't found.  Disabling")
+    find_package(Python3 COMPONENTS Interpreter)
+  message(STATUS "CUDA_ENABLE_BATCHING uses Python version: ${PYTHON_VERSION_STRING}")
+  if(NOT Python3_FOUND)
+    message(SEND_ERROR "CUDA_ENABLE_BATCHING is enabled, but python3 wasn't found.  Disabling")
     set(CUDA_ENABLE_BATCHING OFF CACHE BOOL "Compile CUDA source files in parallel" FORCE)
   endif()
 endif()
@@ -2206,7 +2207,7 @@ endfunction()
 ###############################################################################
 function(CUDA_BATCH_BUILD_END target)
   set(BATCH_CMAKE_SCRIPT "${CMAKE_SOURCE_DIR}/CMake/cuda/FindCUDA/batchCMake.py")
-  find_package(PythonInterp)
+  find_package(Python3 COMPONENTS Interpreter)
 
   if( CUDA_BATCH_BUILD_LOG )
     set(cuda_batch_build_target "_${target}_cudaBatchBuild")
@@ -2216,7 +2217,7 @@ function(CUDA_BATCH_BUILD_END target)
     list(REMOVE_DUPLICATES cuda_depends)
     add_custom_target( ${cuda_batch_build_target}
       COMMENT "CUDA batch build ${cuda_batch_build_target}..."
-      COMMAND "${PYTHON_EXECUTABLE}" "${BATCH_CMAKE_SCRIPT}" -t ${cuda_batch_build_target} -c ${CUDA_BATCH_BUILD_LOG} -s "\"%24(VCInstallDir)=$(VCInstallDir)\\\"" -s "%24(ConfigurationName)=$(ConfigurationName)" -s "%24(Configuration)=$(Configuration)" -s "%24(VCToolsVersion)=$(VCToolsVersion)" -s "%24(PreferredToolArchitecture)=$(PreferredToolArchitecture)" -s "%24(PlatformTarget)=$(PlatformTarget)"   # %24 is the '$' character - needed to escape '$' in VS rule
+      COMMAND "${Python3_EXECUTABLE}" "${BATCH_CMAKE_SCRIPT}" -t ${cuda_batch_build_target} -c ${CUDA_BATCH_BUILD_LOG} -s "\"%24(VCInstallDir)=$(VCInstallDir)\\\"" -s "%24(ConfigurationName)=$(ConfigurationName)" -s "%24(Configuration)=$(Configuration)" -s "%24(VCToolsVersion)=$(VCToolsVersion)" -s "%24(PreferredToolArchitecture)=$(PreferredToolArchitecture)" -s "%24(PlatformTarget)=$(PlatformTarget)"   # %24 is the '$' character - needed to escape '$' in VS rule
       DEPENDS ${cuda_depends}
       )    
     add_dependencies( ${target} ${cuda_batch_build_target} )
@@ -2242,7 +2243,7 @@ function(CUDA_BATCH_DEPENDS_BEGIN)
     # Create batch file to setup VS environment, since CUDA 8 broke running nvcc outside
     # of VS environment.  You could get around this with the following command with newer
     # versions of cmake (3.5.2 worked for me, but 3.2.1 didn't like the && ):
-    # execute_process( COMMAND ${CUDA_VC_VARS_ALL_BAT} && ${PYTHON_EXECUTABLE} ... )
+    # execute_process( COMMAND ${CUDA_VC_VARS_ALL_BAT} && ${Python3_EXECUTABLE} ... )
     if(CMAKE_SIZEOF_VOID_P EQUAL 8)
       set(BUILD_BITS amd64)
     else()
@@ -2252,7 +2253,7 @@ function(CUDA_BATCH_DEPENDS_BEGIN)
       "@echo OFF\n"
       "REM Created by FindCUDA.cmake\n"
       "@call \"${CUDA_VC_VARS_ALL_BAT}\" ${BUILD_BITS}\n"
-      "\"${PYTHON_EXECUTABLE}\" \"${BATCH_CMAKE_SCRIPT}\" -e \"${CUDA_BATCH_DEPENDS_LOG}\" -t \"CUDA batch dependencies\""
+      "\"${Python3_EXECUTABLE}\" \"${BATCH_CMAKE_SCRIPT}\" -e \"${CUDA_BATCH_DEPENDS_LOG}\" -t \"CUDA batch dependencies\""
       )
   endif()
 endfunction()

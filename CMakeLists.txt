@@ -95,7 +95,7 @@ cmake_policy(VERSION 3.27)
 
 if( POLICY CMP0148 )
   # FindCuda uses FindPythonInterp, which was deprecated in 3.12
-  cmake_policy(SET CMP0148 OLD)
+  cmake_policy(SET CMP0148 NEW)
 endif()
 
 if( POLICY CMP0072 )
