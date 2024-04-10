@@ -456,9 +456,9 @@ function(OPTIX_add_sample_executable target_name_base target_name_var)
 
   OPTIX_add_source_groups(CUDA_NVRTC_ENABLED SAMPLES_INPUT_GENERATE_PTX SAMPLES_INPUT_GENERATE_OPTIXIR)
 
-  # Separate the sources from the CMake and CUDA options fed to the macro.  This code
-  # comes from the CUDA_COMPILE_PTX macro found in FindCUDA.cmake.  We are copying the
-  # code here, so that we can use our own name for the target.  target_name is used in the
+  # Separate the sources from the CMake and CUDA options fed to the macro. This code
+  # comes from the CUDA_COMPILE_PTX macro found in FindCUDA.cmake. We are copying the
+  # code here, so that we can use our own name for the target. target_name is used in the
   # creation of the output file names, and we want this to be unique for each target in
   # the SDK.
   CUDA_GET_SOURCES_AND_OPTIONS(source_files cmake_options options ${ARGN})
@@ -488,8 +488,8 @@ function(OPTIX_add_sample_executable target_name_base target_name_var)
     list(APPEND generated_files ${generated_files3})
   endif()
 
-  # Here is where we create the rule to make the executable.  We define a target name and
-  # list all the source files used to create the target.  In addition we also pass along
+  # Here is where we create the rule to make the executable. We define a target name and
+  # list all the source files used to create the target. In addition we also pass along
   # the cmake_options parsed out of the arguments.
   add_executable(${target_name}
     ${source_files}
@@ -497,12 +497,12 @@ function(OPTIX_add_sample_executable target_name_base target_name_var)
     ${cmake_options}
     )
 
-  # Most of the samples link against the sutil library and the optix library.  Here is the
+  # Most of the samples link against the sutil library and the optix library. Here is the
   # rule that specifies this linkage.
   target_link_libraries( ${target_name}
     ${GLFW_LIB_NAME}
     imgui
-    sutil_7_sdk
+    sutil_8_sdk
     )
 
   set_target_properties( ${target_name} PROPERTIES
