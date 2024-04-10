@@ -28,6 +28,8 @@
 
 find_package( OpenGL REQUIRED )
 
+# Glfw target
+
 if( UNIX )
   # On Unix-like systems, shared libraries can use the soname system.
   set(GLFW_LIB_NAME glfw)
@@ -47,6 +49,8 @@ if( WARNINGS_AS_ERRORS AND (USING_GNU_CXX OR USING_CLANG_CXX))
   pop_variable( CMAKE_C_FLAGS )
 endif()
 
+
+# Imgui target
 if( WARNINGS_AS_ERRORS AND (USING_GNU_CXX OR USING_CLANG_CXX))
     push_variable( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-class-memaccess" )
 endif()
@@ -55,6 +59,8 @@ if( WARNINGS_AS_ERRORS AND (USING_GNU_CXX OR USING_CLANG_CXX))
   pop_variable( CMAKE_CXX_FLAGS )
 endif()
 
+
+# Glad target
 add_library( glad SHARED
   KHR/khrplatform.h
   glad/glad.c
