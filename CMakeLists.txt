@@ -97,7 +97,7 @@ cmake_policy(VERSION 3.27)
 #endif()
 
 IF(NOT PASSED_FIRST_CONFIGURE)
-  set(OPTIX_SDK_ROOT_DIR  "C:/GPUstuff/00_OptiX_SDK_800_clean" CACHE PATH "NVIDIA Optix SDK dir that contains the folders: SDK, doc, include" FORCE)
+  set(OPTIX_INSTALL_DIR  "C:/GPUstuff/00_OptiX_SDK_800_clean" CACHE PATH "NVIDIA Optix SDK dir that contains the folders: SDK, doc, include" FORCE)
   set(OPTIX_BIN_OUT_DIR   "${CMAKE_BINARY_DIR}/bin" CACHE PATH "Output folder for binaries" FORCE)
   set(OPTIX_LIB_OUT_DIR   "${CMAKE_BINARY_DIR}/lib" CACHE PATH "Output folder for all non-binaries" FORCE)
 ENDIF(NOT PASSED_FIRST_CONFIGURE)
@@ -105,7 +105,7 @@ ENDIF(NOT PASSED_FIRST_CONFIGURE)
 # Add paths to our CMake code to the module path, so they can be found automatically by
 # CMake.
 set(CMAKE_MODULE_PATH
-  "${OPTIX_SDK_ROOT_DIR}/SDK/CMake"
+  "${OPTIX_INSTALL_DIR}/SDK/CMake"
   ${CMAKE_MODULE_PATH}
   )
 
@@ -364,9 +364,6 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${OPTIX_LIB_OUT_DIR}")
 if( APPLE )
   set( CUDA_TOOLKIT_RPATH_FLAG "-Wl,-rpath,${CUDA_TOOLKIT_ROOT_DIR}/lib" )
 endif()
-
-# Locate the NVRT distribution.  Search the SDK first, then look in the system.
-set(OptiX_INSTALL_DIR "${CMAKE_SOURCE_DIR}/../" CACHE PATH "Path to OptiX installed location.")
 
 # Search for the OptiX libraries and include files.
 find_package(OptiX REQUIRED)
