@@ -99,7 +99,8 @@ cmake_policy(VERSION 3.27)
 IF(NOT PASSED_FIRST_CONFIGURE)
   set(OPTIX_INSTALL_DIR  "C:/GPUstuff/00_OptiX_SDK_800_clean" CACHE PATH "NVIDIA Optix SDK dir that contains the folders: SDK, doc, include" FORCE)
   set(OPTIX_BIN_OUT_DIR   "${CMAKE_BINARY_DIR}/bin" CACHE PATH "Output folder for binaries" FORCE)
-  set(OPTIX_LIB_OUT_DIR   "${CMAKE_BINARY_DIR}/lib" CACHE PATH "Output folder for all non-binaries" FORCE)
+  set(OPTIX_LIB_OUT_DIR   "${CMAKE_BINARY_DIR}/lib" CACHE PATH "Output folder for non-binaries" FORCE)
+  set(OPTIX_PSEUDO_OUT_DIR   "${OPTIX_LIB_OUT_DIR}/ptx" CACHE PATH "Output folder for all compiled CUDA (pseudo-)code (PTX/OPTIXIR)" FORCE)
 ENDIF(NOT PASSED_FIRST_CONFIGURE)
 
 # Add paths to our CMake code to the module path, so they can be found automatically by
