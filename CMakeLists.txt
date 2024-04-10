@@ -89,24 +89,13 @@ project(Optix-RTv1)
 
 # As of CMake 2.6 policies were introduced in order to provide a mechanism for
 # adding backwards compatibility one feature at a time.  We will just specify
-# that all policies will use version 2.8.12 semantics.
-#cmake_policy(VERSION 2.8.12)
+# that all policies will use version 3.27 semantics.
 cmake_policy(VERSION 3.27)
 
-if( POLICY CMP0148 )
-  # FindCuda uses FindPythonInterp, which was deprecated in 3.12
-  cmake_policy(SET CMP0148 NEW)
-endif()
-
-if( POLICY CMP0072 )
-  # FindOpenGL prefers GLVND by default when available
-  cmake_policy(SET CMP0072 NEW)
-endif()
-
-if( POLICY CMP0074 )
-  # find_package uses <PackageName>_ROOT variables.
-  cmake_policy(SET CMP0074 NEW)
-endif()
+#if( POLICY CMP0xxx )
+#  # xxx
+#  cmake_policy(SET CMP0xxx NEW)
+#endif()
 
 # Add paths to our CMake code to the module path, so they can be found automatically by
 # CMake.
