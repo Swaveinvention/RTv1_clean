@@ -122,8 +122,10 @@ option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 ##########
 # Process our custom setup scripts here.
 
-# Enable C++11. Needs to be done before the include of ConfigCompilerFlags.cmake below.
-set(GCC_LIBSTDCPP11 ON)
+# FIXME: Check if this can be deprecated
+  # Enable C++11. Needs to be done before the include of ConfigCompilerFlags.cmake below.
+  set(GCC_LIBSTDCPP11 ON)
+# FIXME END
 
 # Include all CMake Macros.
 include(Macros)
@@ -143,9 +145,10 @@ if(USING_CLANG_C)
 endif()
 
 # CUDA 8 is broken for generating dependencies during configure
-option(CUDA_GENERATE_DEPENDENCIES_DURING_CONFIGURE "Generate dependencies during configure time instead of only during build time." OFF)
+option(CUDA_GENERATE_DEPENDENCIES_DURING_CONFIGURE "Generate dependencies during configure time instead of only during build time. Only required for CUDA 8." OFF)
 
 # Passing the --use-local-env option to NVCC can dramatically speed up CUDA compilation
+# Skip MSVC environment initialization.
 if(WIN32)
   option(CUDA_USE_LOCAL_ENV "Pass the '--use-local-env' option to NVCC; only applies to initial configure" ON)
 endif()
