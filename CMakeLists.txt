@@ -211,9 +211,10 @@ else()
   option( SAMPLES_INPUT_GENERATE_PTX "Generate PTX OptiX shaders" ON )
 endif()
 
-# Determine if we are going to use the static CRT on windows.
+# FIXME: check if default should not be OFF
+# Determine if we are going to use the static C runtime (CRT) on windows.
 if(WIN32)
-  option(RELEASE_USE_STATIC_CRT "Build using the static CRT library" ON)
+  option(RELEASE_USE_STATIC_CRT "Build using the static C runtime (CRT) library on Windows" OFF)
 endif()
 
 # Helper for fixing compiler flags
