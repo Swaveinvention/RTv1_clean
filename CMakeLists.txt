@@ -370,7 +370,7 @@ find_package(OptiX REQUIRED)
 
 # Add the path to the OptiX headers to our include paths.
 include_directories(
-  "${OptiX_INCLUDE}"
+  "${OPTIX_INCLUDE_DIR}"
   "${CMAKE_CURRENT_SOURCE_DIR}/cuda"
   )
 
@@ -383,9 +383,10 @@ endif()
 ##################################################################
 # SUtil compilation
 
-set(SAMPLES_PTX_DIR "${CMAKE_BINARY_DIR}/lib/ptx")
-set(SAMPLES_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
-
+set(SAMPLES_PTX_DIR "${OPTIX_PSEUDO_OUT_DIR}")
+set(SAMPLES_DIR "${OPTIX_SDK_DIR}")
+set(SAMPLES_CUDA_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cuda")
+set(SAMPLES_SUPPORT_DIR "${OPTIX_SDK_DIR}/support")
 set(CUDA_GENERATED_OUTPUT_DIR ${SAMPLES_PTX_DIR})
 
 if( WIN32 )
@@ -396,9 +397,7 @@ else( WIN32 )
   endif()
 endif( WIN32 )
 
-set(SAMPLES_CUDA_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cuda")
 
-set(SAMPLES_SUPPORT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../SDK/support")
 
 # NVRTC include paths relative to the sample path
 set(SAMPLES_RELATIVE_INCLUDE_DIRS "\\
@@ -408,7 +407,7 @@ set(SAMPLES_RELATIVE_INCLUDE_DIRS "\\
 
 # NVRTC absolute include paths to the headers used to build the samples
 set(SAMPLES_ABSOLUTE_INCLUDE_DIRS "\\
-  \"${OptiX_INCLUDE}\", \\
+  \"${OPTIX_INCLUDE_DIR}\", \\
   \"${CUDA_INCLUDE_DIRS}\", ")
 
 # Build a null-terminated option list for NVRTC

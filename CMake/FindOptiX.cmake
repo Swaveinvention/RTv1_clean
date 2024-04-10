@@ -28,8 +28,8 @@
 
 # 2024 Tobias Birnbaum, Swave BV
 #
-# NOTE: Propose Optix distribution location by setting OPTIX_INSTALL_DIR in parent scope!
-# Sets OPTIX_VERSION, OPTIX_VERSION_STRING, OPTIX_VERSION_MAJOR, OPTIX_VERSION_MINOR, OPTIX_VERSION_MICRO in parent context.
+# NOTE: Propose Optix distribution location by setting OPTIX_INSTALL_DIR in parent scope prior to calling find_package(OptiX)!
+# Sets OPTIX_INCLUDE, OPTIX_SDK_DIR, OPTIX_VERSION, OPTIX_VERSION_STRING, OPTIX_VERSION_MAJOR, OPTIX_VERSION_MINOR, OPTIX_VERSION_MICRO in parent context.
 
 set(OPTIX_INSTALL_DIR_SDK_DEFAULT       "${CMAKE_SOURCE_DIR}/../" CACHE PATH "Path to Optix location, if called from SDK." INTERNAL)
 
@@ -112,15 +112,15 @@ function(OptiX_version_parse optix_header)
 endfunction()
 
 foreach(install_dir IN LISTS install_dir_list)
-    if(DEFINED OptiX_INCLUDE AND NOT OptiX_INCLUDE)
+    if(DEFINED OPTIX_INCLUDE_DIR AND NOT OPTIX_INCLUDE_DIR)
         message(STATUS "Trying to find Optix in: ${OPTIX_INSTALL_DIR}")
         # Include
-        find_path(OptiX_INCLUDE
+        find_path(OPTIX_INCLUDE_DIR
           NAMES optix.h
           PATHS "${install_dir}/include"
           NO_DEFAULT_PATH
           )
-        find_path(OptiX_INCLUDE
+        find_path(OPTIX_INCLUDE_DIR
           NAMES optix.h
           )
     else()
@@ -128,11 +128,20 @@ foreach(install_dir IN LISTS install_dir_list)
     endif()
 endforeach()
 
+if(IS_DIRECTORY ${OPTIX_INSTALL_DIR} AND NOT EXISTS "${OPTIX_INSTALL_DIR}/SDK/")
+    set(OPTIX_SDK_DIR "${OPTIX_INCLUDE_DIR}/../")
+    message(WARNING "OPTIX_INSTALL_DIR has no SDK root, it will be updated to.")
+else()
+    set(OPTIX_SDK_DIR "${OPTIX_INSTALL_DIR}/SDK/")
+endif()
+message(STATUS "OPTIX_SDK_DIR set to: ${OPTIX_SDK_DIR}")
 
-if(NOT OptiX_INCLUDE)
+if(NOT OPTIX_INCLUDE_DIR)
     OptiX_report_error("OptiX headers (optix.h and friends) not found." TRUE headers )
 else()
-    message(STATUS "Optix headers found in: ${OptiX_INCLUDE}")
-    OptiX_version_parse("${OptiX_INCLUDE}/optix.h")
+    message(STATUS "Optix headers found in: ${OPTIX_INCLUDE_DIR}")
+    OptiX_version_parse("${OPTIX_INCLUDE_DIR}/optix.h")
     message(STATUS "Optix version found: ${OPTIX_VERSION}")
+
+    set(OPTIX_INSTALL_DIR "${OPTIX_INCLUDE_DIR}/../" PATH FORCE PARENT_SCOPE)
 endif()
