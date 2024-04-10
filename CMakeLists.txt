@@ -76,8 +76,9 @@
 # If you have any questions, don't feel shy about posting to the OptiX forums:
 # https://devtalk.nvidia.com/default/board/90/
 
-set(OPTIX_SDK_ROOT_DIR "C:/GPUstuff/00_OptiX_SDK_800_clean" CACHE PATH "NVIDIA Optix SDK dir that contains the folders: SDK, doc, include" FORCE)
-
+IF(NOT PASSED_FIRST_CONFIGURE)
+  set(OPTIX_SDK_ROOT_DIR "C:/GPUstuff/00_OptiX_SDK_800_clean" CACHE PATH "NVIDIA Optix SDK dir that contains the folders: SDK, doc, include" FORCE)
+ENDIF(NOT PASSED_FIRST_CONFIGURE)
 
 # We rely on VERSION_GREATER_EQUAL which requires CMake v. 3.27 because of better CUDA support.
 cmake_minimum_required(VERSION 3.27 FATAL_ERROR)
