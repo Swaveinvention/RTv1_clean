@@ -106,7 +106,7 @@ set(CMAKE_MODULE_PATH
   ${CMAKE_MODULE_PATH}
   )
 
-# Set the default build to Release.  Note this doesn't do anything for the VS
+# Set the default build to Release. Note, this doesn't do anything for the VS
 # default build target which defaults to Debug when you first start it.
 IF(NOT CMAKE_BUILD_TYPE)
   SET(CMAKE_BUILD_TYPE "Release" CACHE STRING
@@ -115,7 +115,7 @@ IF(NOT CMAKE_BUILD_TYPE)
 ENDIF(NOT CMAKE_BUILD_TYPE)
 
 # Tells CMake to build all the libraries as shared libraries by default.  This can be
-# overrided by individual libraries later.
+# overwritten by individual libraries later.
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 
 ##########
