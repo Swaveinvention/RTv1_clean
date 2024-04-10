@@ -440,38 +440,8 @@ include_directories( ${OPTIX_SDK_DIR}
 message(TRACE "Current binary dir:  ${CMAKE_CURRENT_BINARY_DIR}")
 message(TRACE "Root binary dir:     ${CMAKE_BINARY_DIR}")
 
-set(SAMPLES_CUDA_DIR ${OPTIX_SDK_DIR}/cuda)
-
-# Helper macro to generate PTX from the CUDA files in sutil.
-macro(OPTIX_sutil_compile_to_optix_input generated_files)
-  if( NOT CUDA_NVRTC_ENABLED )
-    if( SAMPLES_INPUT_GENERATE_OPTIXIR )
-      message("sutil OPTIXIR")
-      CUDA_WRAP_SRCS( sutil OPTIXIR generated_files2 ${ARGN} )
-      list(APPEND ${generated_files} ${generated_files2})
-    endif()
-    if( SAMPLES_INPUT_GENERATE_PTX )
-      message("sutil PTX")
-      CUDA_WRAP_SRCS( sutil PTX generated_files3 ${ARGN} )
-      list(APPEND ${generated_files} ${generated_files3})
-    endif()
-  endif()
-  message("${generated_files} = ${${generated_files}}")
-endmacro()
-
-# These calls will group PTX and CUDA files into their own directories in the Visual
-# Studio projects.
-macro(OPTIX_add_source_groups)
-  if( NOT CUDA_NVRTC_ENABLED )
-    if( SAMPLES_INPUT_GENERATE_PTX )
-      source_group("PTX Files"  REGULAR_EXPRESSION ".+\\.ptx$")
-    endif()
-    if( SAMPLES_INPUT_GENERATE_OPTIXIR )
-      source_group("OptixIR Files"  REGULAR_EXPRESSION ".+\\.optixir$")
-    endif()
-  endif()
-  source_group("CUDA Files" REGULAR_EXPRESSION ".+\\.cu$")
-endmacro()
+# Load util specific macros
+include(MacrosSutil)
 
 #########################################################
 # OPTIX_add_sample_executable
@@ -484,7 +454,7 @@ function(OPTIX_add_sample_executable target_name_base target_name_var)
   set( target_name ${target_name_base} )
   set( ${target_name_var} ${target_name} PARENT_SCOPE )
 
-  OPTIX_add_source_groups()
+  OPTIX_add_source_groups(CUDA_NVRTC_ENABLED SAMPLES_INPUT_GENERATE_PTX SAMPLES_INPUT_GENERATE_OPTIXIR)
 
   # Separate the sources from the CMake and CUDA options fed to the macro.  This code
   # comes from the CUDA_COMPILE_PTX macro found in FindCUDA.cmake.  We are copying the

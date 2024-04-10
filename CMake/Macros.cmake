@@ -1063,3 +1063,30 @@ macro( optixSharedLibraryResources outputName )
     source_group( Resources FILES ${resourceFiles} )
   endif()
 endmacro()
+
+
+################################################################
+# OPTIX_add_source_groups 
+#
+# These calls will group PTX and CUDA files into their own directories in the Visual
+# Studio projects.
+#
+# CUDA_NVRTC_ENABLED - Boolean controlling NVRTC use 
+# SAMPLES_INPUT_GENERATE_PTX - Boolean controlling production of PTX 
+# SAMPLES_INPUT_GENERATE_OPTIXIR - Boolean controlling production of OPTIXIR 
+#
+# Side effects:
+#
+# Creates source_groups for ptx, optixir, cu files for VS projects 
+
+macro(OPTIX_add_source_groups CUDA_NVRTC_ENABLED SAMPLES_INPUT_GENERATE_PTX SAMPLES_INPUT_GENERATE_OPTIXIR)
+  if( NOT CUDA_NVRTC_ENABLED )
+    if( SAMPLES_INPUT_GENERATE_PTX )
+      source_group("PTX Files"  REGULAR_EXPRESSION ".+\\.ptx$")
+    endif()
+    if( SAMPLES_INPUT_GENERATE_OPTIXIR )
+      source_group("OptixIR Files"  REGULAR_EXPRESSION ".+\\.optixir$")
+    endif()
+  endif()
+  source_group("CUDA Files" REGULAR_EXPRESSION ".+\\.cu$")
+endmacro()

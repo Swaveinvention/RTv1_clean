@@ -74,7 +74,7 @@ else()
   set(ptx_files)
 endif()
 
-OPTIX_add_source_groups()
+OPTIX_add_source_groups(CUDA_NVRTC_ENABLED SAMPLES_INPUT_GENERATE_PTX SAMPLES_INPUT_GENERATE_OPTIXIR)
 
 # Make the library.
 set(sutil_target "sutil_7_sdk")
