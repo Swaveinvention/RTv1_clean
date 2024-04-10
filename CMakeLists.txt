@@ -256,8 +256,8 @@ function(optix_add_cuda_flag flag)
   optix_add_cuda_flag_config( "" ${flag} )
 endfunction()
 
-# Add some useful default arguments to the NVCC and NVRTC flags.  This is an example of
-# how we use PASSED_FIRST_CONFIGURE.  Once you have configured, this variable is TRUE
+# Add some useful default arguments to the NVCC and NVRTC flags. This is an example of
+# how we use PASSED_FIRST_CONFIGURE. Once you have configured, this variable is TRUE
 # and following block of code will not be executed leaving you free to edit the values
 # as much as you wish from the GUI or from ccmake.
 if( NOT PASSED_FIRST_CONFIGURE )
@@ -286,9 +286,8 @@ if( NOT PASSED_FIRST_CONFIGURE )
     endif()
   endif()
 
-
-
   if( CUDA_VERSION VERSION_LESS "3.0" )
+    message(DEPRECATION "Cuda <=3.0 should not be used anymore.")
     optix_add_cuda_flag("--keep")
   endif()
 
