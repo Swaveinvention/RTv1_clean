@@ -77,7 +77,7 @@ endif()
 OPTIX_add_source_groups(CUDA_NVRTC_ENABLED SAMPLES_INPUT_GENERATE_PTX SAMPLES_INPUT_GENERATE_OPTIXIR)
 
 # Make the library.
-set(sutil_target "sutil_8_sdk")
+set(sutil_target "sutil_7_sdk")
 add_library(${sutil_target} ${sources} ${ptx_files})
 if( WIN32 )
   target_compile_definitions( ${sutil_target} PUBLIC GLAD_GLAPI_EXPORT )
