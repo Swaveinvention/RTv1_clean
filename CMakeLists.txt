@@ -402,20 +402,18 @@ else( WIN32 )
   endif()
 endif( WIN32 )
 
-
-
-# NVRTC include paths relative to the sample path
+# NVRTC include paths relative to the sample path (used in sampleConfig.h.in)
 set(SAMPLES_RELATIVE_INCLUDE_DIRS "\\
   \"cuda\", \\
   \"sutil\", \\
   \".\", ")
 
-# NVRTC absolute include paths to the headers used to build the samples
+# NVRTC absolute include paths to the headers used to build the samples (used in sampleConfig.h.in)
 set(SAMPLES_ABSOLUTE_INCLUDE_DIRS "\\
   \"${OPTIX_INCLUDE_DIR}\", \\
   \"${CUDA_INCLUDE_DIRS}\", ")
 
-# Build a null-terminated option list for NVRTC
+# Build a null-terminated option list for NVRTC (used in sampleConfig.h.in)
 set( config_suffixes "_RELEASE" "_DEBUG" )
 foreach( config_suffix ${config_suffixes} )
   # CMake doesn't allow empty strings in lists, so use a dummy suffix
@@ -430,6 +428,8 @@ foreach( config_suffix ${config_suffixes} )
 endforeach()
 
 configure_file(sampleConfig.h.in sampleConfig.h @ONLY)
+
+
 
 # Path to sutil.h that all the samples need
 include_directories( ${OPTIX_SDK_DIR}
