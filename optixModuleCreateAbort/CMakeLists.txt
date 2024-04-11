@@ -44,7 +44,7 @@ add_executable( optixModuleCreateProcess
 
 target_link_libraries( optixModuleCreateProcess
   glad
-  sutil_7_sdk
+  sutil_8_sdk
   ${CUDA_LIBRARIES}
   )
 

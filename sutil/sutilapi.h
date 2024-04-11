@@ -29,7 +29,7 @@
 #pragma once
 
 #ifndef SUTILAPI
-#  if sutil_7_sdk_EXPORTS /* Set by CMAKE */
+#  if sutil_8_sdk_EXPORTS /* Set by CMAKE */
 #    if defined( _WIN32 ) || defined( _WIN64 )
 #      define SUTILAPI __declspec(dllexport)
 #      define SUTILCLASSAPI
@@ -43,7 +43,7 @@
 #      error "CODE FOR THIS OS HAS NOT YET BEEN DEFINED"
 #    endif
 
-#  else /* sutil_7_sdk_EXPORTS */
+#  else /* sutil_8_sdk_EXPORTS */
 
 #    if defined( _WIN32 ) || defined( _WIN64 )
 #      define SUTILAPI __declspec(dllimport)
@@ -61,5 +61,5 @@
 #      error "CODE FOR THIS OS HAS NOT YET BEEN DEFINED"
 #    endif
 
-#  endif /* sutil_7_sdk_EXPORTS */
+#  endif /* sutil_8_sdk_EXPORTS */
 #endif
