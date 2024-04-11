@@ -82,7 +82,7 @@ OPTION( ASSIMP_NO_EXPORT
 )
 OPTION( ASSIMP_BUILD_ZLIB
   "Build your own zlib"
-  OFF
+  ON
 )
 OPTION( ASSIMP_BUILD_ASSIMP_TOOLS
   "If the supplementary tools for Assimp are built in addition to the library."
@@ -94,7 +94,7 @@ OPTION ( ASSIMP_BUILD_SAMPLES
 )
 OPTION ( ASSIMP_BUILD_TESTS
   "If the test suite for Assimp is built in addition to the library."
-  ON
+  OFF
 )
 OPTION ( ASSIMP_COVERALLS
   "Enable this to measure test coverage."
@@ -122,7 +122,7 @@ OPTION ( BUILD_DOCS
 )
 OPTION( INJECT_DEBUG_POSTFIX
   "Inject debug postfix in .a/.so/.dll lib names"
-  ON
+  OFF
 )
 
 OPTION ( IGNORE_GIT_HASH
