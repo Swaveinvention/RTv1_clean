@@ -429,8 +429,6 @@ endforeach()
 
 configure_file(sampleConfig.h.in sampleConfig.h @ONLY)
 
-
-
 # Path to sutil.h that all the samples need
 include_directories( ${OPTIX_SDK_DIR}
                      "${CMAKE_BINARY_DIR}/include"
@@ -532,6 +530,18 @@ function(OPTIX_add_sample_executable target_name_base target_name_var)
     target_link_libraries( ${target_name} m ) # Explicitly link against math library (C samples don't do that by default)
   endif()
 endfunction()
+
+
+#########################################################
+# Set RTv1 external dependencies
+set(CLI11_INC_DIR ${SAMPLES_SUPPORT_DIR}/cli11/include)
+set(LIBCONFIG_INC_DIR ${SAMPLES_SUPPORT_DIR}/libconfig/lib)
+# Note: Assumes that assimp is configured to be built in assimp.../bin
+set(ASSIMP_INC_DIR ${SAMPLES_SUPPORT_DIR}/assimp-5.0.1/include ${SAMPLES_SUPPORT_DIR}/assimp-5.0.1/bin/include)
+
+
+
+
 
 #########################################################
 #  List of samples found in subdirectories.
