@@ -375,18 +375,22 @@ endif()
 # Search for the OptiX libraries and include files.
 find_package(OptiX REQUIRED)
 
-# Add the path to the OptiX headers to our include paths.
-include_directories(
-  "${OPTIX_INCLUDE_DIR}"
-  "${CMAKE_CURRENT_SOURCE_DIR}/cuda"
-  )
 
 ##################################################################
 # SUtil compilation
 
-set(SAMPLES_PTX_DIR "${OPTIX_PSEUDO_OUT_DIR}")
-set(SAMPLES_DIR "${OPTIX_SDK_DIR}")
-set(SAMPLES_CUDA_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cuda")
+# The following folders are replaced in sampleConfig.h.in using CMake's configure_file
+set(SAMPLES_DIR "${OPTIX_SDK_DIR}" INTERNAL)
+set(SAMPLES_PTX_DIR "${OPTIX_PSEUDO_OUT_DIR}" CACHE PATH "Optix/CUDA pseudocode output folder" FORCE)
+set(SAMPLES_CUDA_DIR "${OPTIX_SDK_DIR}/cuda" CACHE PATH "CUDA includes provided by Optix SDK" FORCE)
+
+# Add the path to the OptiX headers to our include paths.
+include_directories(
+        "${OPTIX_INCLUDE_DIR}"
+        "${SAMPLES_CUDA_DIR}"
+)
+
+# The following folders are used locally
 set(SAMPLES_SUPPORT_DIR "${OPTIX_SDK_DIR}/support")
 set(CUDA_GENERATED_OUTPUT_DIR ${SAMPLES_PTX_DIR})
 
@@ -428,13 +432,13 @@ endforeach()
 configure_file(sampleConfig.h.in sampleConfig.h @ONLY)
 
 # Path to sutil.h that all the samples need
-include_directories( ${CMAKE_CURRENT_SOURCE_DIR}
+include_directories( ${OPTIX_SDK_DIR}
                      "${CMAKE_BINARY_DIR}/include"
                      ${CMAKE_CURRENT_BINARY_DIR}
                      ${CUDA_INCLUDE_DIRS}
                      )
 
-set(SAMPLES_CUDA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/cuda)
+set(SAMPLES_CUDA_DIR ${OPTIX_SDK_DIR}/cuda)
 
 # Helper macro to generate PTX from the CUDA files in sutil.
 macro(OPTIX_sutil_compile_to_optix_input generated_files)
