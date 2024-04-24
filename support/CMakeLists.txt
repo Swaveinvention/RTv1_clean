@@ -77,3 +77,15 @@ target_link_libraries( glad PUBLIC ${OPENGL_LIBRARIES} )
 set_property( TARGET glad PROPERTY FOLDER ${OPTIX_IDE_FOLDER} )
 set_property( TARGET glfw PROPERTY FOLDER ${OPTIX_IDE_FOLDER} )
 set_property( TARGET imgui PROPERTY FOLDER ${OPTIX_IDE_FOLDER} )
+
+
+# Assimp target
+option(ASSIMP_BUILD_ZLIB ON)
+option(ASSIMP_BUILD_ASSIMP_TOOLS ON)
+option(INJECT_DEBUG_POSTFIX OFF)
+add_subdirectory(assimp-5.0.1)
+
+# Libconfig target
+option(BUILD_EXAMPLES OFF)
+option(BUILD_TESTS OFF)
+add_subdirectory(libconfig)
