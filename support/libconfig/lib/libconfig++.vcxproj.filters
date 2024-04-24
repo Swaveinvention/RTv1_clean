@@ -35,9 +35,6 @@
     <ClCompile Include="util.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="wincompat.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\ac_config.h">
@@ -47,9 +44,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="libconfig.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="libconfig.hh">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="parsectx.h">
@@ -76,5 +70,10 @@
     <ClInclude Include="wincompat.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="libconfig.hh">
+      <Filter>Header Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

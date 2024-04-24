@@ -1,6 +1,6 @@
 /* ----------------------------------------------------------------------------
    libconfig - A library for processing structured configuration files
-   Copyright (C) 2005-2018  Mark A Lindner
+   Copyright (C) 2005-2023  Mark A Lindner
 
    This file is part of libconfig.
 
@@ -42,8 +42,18 @@ static const char **__include_func(config_t *config,
                                    const char *path,
                                    const char **error)
 {
+  (void)include_dir;
   Config *self = reinterpret_cast<Config *>(config_get_hook(config));
   return(self->evaluateIncludePath(path, error));
+}
+
+// ---------------------------------------------------------------------------
+
+static void __fatal_error_func(const char *message)
+{
+  // Assume memory allocation failure; this is the only fatal error
+  // condition currently defined.
+  throw std::bad_alloc();
 }
 
 // ---------------------------------------------------------------------------
@@ -254,6 +264,35 @@ const char *SettingTypeException::what() const LIBCONFIGXX_NOEXCEPT
 
 // ---------------------------------------------------------------------------
 
+SettingRangeException::SettingRangeException(const Setting &setting)
+  : SettingException(setting)
+{
+}
+
+// ---------------------------------------------------------------------------
+
+SettingRangeException::SettingRangeException(const Setting &setting, int idx)
+  : SettingException(setting, idx)
+{
+}
+
+// ---------------------------------------------------------------------------
+
+SettingRangeException::SettingRangeException(const Setting &setting,
+                                             const char *name)
+  : SettingException(setting, name)
+{
+}
+
+// ---------------------------------------------------------------------------
+
+const char *SettingRangeException::what() const LIBCONFIGXX_NOEXCEPT
+{
+  return("SettingRangeException");
+}
+
+// ---------------------------------------------------------------------------
+
 SettingNotFoundException::SettingNotFoundException(const Setting &setting,
                                                    int idx)
   : SettingException(setting, idx)
@@ -321,6 +360,7 @@ Config::Config()
   config_set_hook(_config, reinterpret_cast<void *>(this));
   config_set_destructor(_config, ConfigDestructor);
   config_set_include_func(_config, __include_func);
+  config_set_fatal_error_func(__fatal_error_func);
 }
 
 // ---------------------------------------------------------------------------
@@ -686,6 +726,15 @@ Setting::operator bool() const
 
 Setting::operator int() const
 {
+  if(_type == TypeInt64)
+  {
+    long long val = config_setting_get_int64(_setting);
+    if((val < INT_MIN) || (val > INT_MAX))
+      throw SettingRangeException(*this);
+
+    return((int)val);
+  }
+
   assertType(TypeInt);
 
   return(config_setting_get_int(_setting));
@@ -695,9 +744,20 @@ Setting::operator int() const
 
 Setting::operator unsigned int() const
 {
+  if(_type == TypeInt64)
+  {
+    long long val = config_setting_get_int64(_setting);
+    if((val < 0) || (val > UINT_MAX))
+      throw SettingRangeException(*this);
+
+    return(static_cast<unsigned int>(val));
+  }
+
   assertType(TypeInt);
 
   int v = config_setting_get_int(_setting);
+  if(v < 0)
+    throw SettingRangeException(*this);
 
   return(static_cast<unsigned int>(v));
 }
@@ -726,6 +786,9 @@ Setting::operator unsigned long() const
 
 Setting::operator long long() const
 {
+  if(_type == TypeInt)
+    return((long long)config_setting_get_int(_setting));
+
   assertType(TypeInt64);
 
   return(config_setting_get_int64(_setting));
@@ -735,9 +798,20 @@ Setting::operator long long() const
 
 Setting::operator unsigned long long() const
 {
+  if(_type == TypeInt)
+  {
+    int val = config_setting_get_int(_setting);
+    if(val < 0)
+      throw SettingRangeException(*this);
+
+    return(static_cast<unsigned long long>(val));
+  }
+
   assertType(TypeInt64);
 
   long long v = config_setting_get_int64(_setting);
+  if(v < 0)
+    throw SettingRangeException(*this);
 
   return(static_cast<unsigned long long>(v));
 }

@@ -1,6 +1,6 @@
 /* ----------------------------------------------------------------------------
    libconfig - A library for processing structured configuration files
-   Copyright (C) 2005-2018  Mark A Lindner
+   Copyright (C) 2005-2023  Mark A Lindner
 
    This file is part of libconfig.
 
@@ -41,7 +41,7 @@ extern "C" {
 
 #define LIBCONFIG_VER_MAJOR    1
 #define LIBCONFIG_VER_MINOR    7
-#define LIBCONFIG_VER_REVISION 0
+#define LIBCONFIG_VER_REVISION 4
 
 #include <stdio.h>
 
@@ -82,8 +82,8 @@ typedef union config_value_t
 typedef struct config_setting_t
 {
   char *name;
-  short type;
-  short format;
+  unsigned short type;
+  unsigned short format;
   config_value_t value;
   struct config_setting_t *parent;
   struct config_t *config;
@@ -110,6 +110,8 @@ typedef const char ** (*config_include_fn_t)(struct config_t *,
                                              const char *,
                                              const char **);
 
+typedef void (*config_fatal_error_fn_t)(const char *);
+
 typedef struct config_t
 {
   config_setting_t *root;
@@ -132,7 +134,7 @@ extern LIBCONFIG_API int config_read(config_t *config, FILE *stream);
 extern LIBCONFIG_API void config_write(const config_t *config, FILE *stream);
 
 extern LIBCONFIG_API void config_set_default_format(config_t *config,
-                                                    short format);
+                                                    unsigned short format);
 
 extern LIBCONFIG_API void config_set_options(config_t *config, int options);
 extern LIBCONFIG_API int config_get_options(const config_t *config);
@@ -173,6 +175,9 @@ extern LIBCONFIG_API void config_init(config_t *config);
 extern LIBCONFIG_API void config_destroy(config_t *config);
 extern LIBCONFIG_API void config_clear(config_t *config);
 
+extern LIBCONFIG_API void config_set_fatal_error_func(
+  config_fatal_error_fn_t func);
+
 extern LIBCONFIG_API int config_setting_get_int(
   const config_setting_t *setting);
 extern LIBCONFIG_API long long config_setting_get_int64(
@@ -207,8 +212,8 @@ extern LIBCONFIG_API int config_setting_set_string(config_setting_t *setting,
                                                    const char *value);
 
 extern LIBCONFIG_API int config_setting_set_format(config_setting_t *setting,
-                                                   short format);
-extern LIBCONFIG_API short config_setting_get_format(
+                                                   unsigned short format);
+extern LIBCONFIG_API unsigned short config_setting_get_format(
   const config_setting_t *setting);
 
 extern LIBCONFIG_API int config_setting_get_int_elem(
@@ -301,8 +306,13 @@ extern LIBCONFIG_API void config_setting_set_hook(config_setting_t *setting,
 
 extern LIBCONFIG_API config_setting_t *config_lookup(const config_t *config,
                                                      const char *path);
+extern LIBCONFIG_API const config_setting_t *config_lookup_const(
+  const config_t *config, const char *path);
+  
 extern LIBCONFIG_API config_setting_t *config_setting_lookup(
-  config_setting_t *setting, const char *path);
+  const config_setting_t *setting, const char *path);
+extern LIBCONFIG_API const config_setting_t *config_setting_lookup_const(
+  const config_setting_t *setting, const char *path);
 
 extern LIBCONFIG_API int config_lookup_int(const config_t *config,
                                            const char *path, int *value);
@@ -322,10 +332,10 @@ extern LIBCONFIG_API int config_lookup_string(const config_t *config,
   ((C)->root)
 
 #define  /* void */ config_set_default_format(/* config_t * */ C,       \
-                                              /* short */ F)            \
+                                              /* unsigned short */ F)   \
   (C)->default_format = (F)
 
-#define /* short */ config_get_default_format(/* config_t * */ C)       \
+#define /* unsigned short */ config_get_default_format(/* config_t * */ C) \
   ((C)->default_format)
 
 #define /* unsigned short */ config_setting_source_line(   \

@@ -1,6 +1,6 @@
 /* ----------------------------------------------------------------------------
    libconfig - A library for processing structured configuration files
-   Copyright (C) 2005-2020  Mark A Lindner
+   Copyright (C) 2005-2023  Mark A Lindner
 
    This file is part of libconfig.
 
@@ -121,32 +121,6 @@ static void __config_locale_restore(void)
 #warning "No way to modify calling thread's locale!"
 
 #endif
-}
-
-/* ------------------------------------------------------------------------- */
-
-static int __config_name_compare(const char *a, const char *b)
-{
-  const char *p, *q;
-
-  for(p = a, q = b; ; p++, q++)
-  {
-    int pd = ((! *p) || strchr(PATH_TOKENS, *p));
-    int qd = ((! *q) || strchr(PATH_TOKENS, *q));
-
-    if(pd && qd)
-      break;
-    else if(pd)
-      return(-1);
-    else if(qd)
-      return(1);
-    else if(*p < *q)
-      return(-1);
-    else if(*p > *q)
-      return(1);
-  }
-
-  return(0);
 }
 
 /* ------------------------------------------------------------------------- */
@@ -374,7 +348,7 @@ static void __config_list_add(config_list_t *list, config_setting_t *setting)
 {
   if((list->length % CHUNK_SIZE) == 0)
   {
-    list->elements = (config_setting_t **)realloc(
+    list->elements = (config_setting_t **)libconfig_realloc(
       list->elements,
       (list->length + CHUNK_SIZE) * sizeof(config_setting_t *));
   }
@@ -385,14 +359,18 @@ static void __config_list_add(config_list_t *list, config_setting_t *setting)
 
 /* ------------------------------------------------------------------------- */
 
+/* This function takes the length of the name to be searched for, so that one
+ * component of a longer path can be passed in.
+ */
 static config_setting_t *__config_list_search(config_list_t *list,
                                               const char *name,
+                                              size_t namelen,
                                               unsigned int *idx)
 {
   config_setting_t **found = NULL;
   unsigned int i;
 
-  if(! list)
+  if(! list || ! name)
     return(NULL);
 
   for(i = 0, found = list->elements; i < list->length; i++, found++)
@@ -400,7 +378,8 @@ static config_setting_t *__config_list_search(config_list_t *list,
     if(! (*found)->name)
       continue;
 
-    if(! __config_name_compare(name, (*found)->name))
+    if((strlen((*found)->name) == namelen)
+        && !strncmp(name, (*found)->name, namelen))
     {
       if(idx)
         *idx = i;
@@ -653,7 +632,7 @@ int config_read_file(config_t *config, const char *filename)
   if(stream != NULL)
   {
     // On some operating systems, fopen() succeeds on a directory.
-    int fd = fileno(stream);
+    int fd = posix_fileno(stream);
     struct stat statbuf;
 
     if(fstat(fd, &statbuf) == 0)
@@ -696,11 +675,11 @@ int config_write_file(config_t *config, const char *filename)
 
   if(config_get_option(config, CONFIG_OPTION_FSYNC))
   {
-    int fd = fileno(stream);
+    int fd = posix_fileno(stream);
 
     if(fd >= 0)
     {
-      if(fsync(fd) != 0)
+      if(posix_fsync(fd) != 0)
       {
         fclose(stream);
         config->error_text = __io_error;
@@ -731,7 +710,9 @@ void config_clear(config_t *config)
 {
   /* Destroy the root setting (recursively) and then create a new one. */
   __config_setting_destroy(config->root);
+
   libconfig_strvec_delete(config->filenames);
+  config->filenames = NULL;
 
   config->root = __new(config_setting_t);
   config->root->type = CONFIG_TYPE_GROUP;
@@ -819,6 +800,12 @@ int config_get_option(const config_t *config, int option)
 void config_set_hook(config_t *config, void *hook)
 {
   config->hook = hook;
+}
+
+/* ------------------------------------------------------------------------- */
+
+void config_set_fatal_error_func(config_fatal_error_fn_t func) {
+  libconfig_set_fatal_error_func(func);
 }
 
 /* ------------------------------------------------------------------------- */
@@ -1190,7 +1177,7 @@ int config_setting_set_string(config_setting_t *setting, const char *value)
 
 /* ------------------------------------------------------------------------- */
 
-int config_setting_set_format(config_setting_t *setting, short format)
+int config_setting_set_format(config_setting_t *setting, unsigned short format)
 {
   if(((setting->type != CONFIG_TYPE_INT)
       && (setting->type != CONFIG_TYPE_INT64))
@@ -1204,7 +1191,7 @@ int config_setting_set_format(config_setting_t *setting, short format)
 
 /* ------------------------------------------------------------------------- */
 
-short config_setting_get_format(const config_setting_t *setting)
+unsigned short config_setting_get_format(const config_setting_t *setting)
 {
   return(setting->format != 0 ? setting->format
          : setting->config->default_format);
@@ -1212,40 +1199,64 @@ short config_setting_get_format(const config_setting_t *setting)
 
 /* ------------------------------------------------------------------------- */
 
-config_setting_t *config_setting_lookup(config_setting_t *setting,
-                                        const char *path)
+const config_setting_t *config_setting_lookup_const(
+  const config_setting_t *setting, const char *path)
 {
   const char *p = path;
-  config_setting_t *found;
+  const config_setting_t *found = setting;
 
-  for(;;)
+  while(*p && found)
   {
-    while(*p && strchr(PATH_TOKENS, *p))
-      p++;
-
-    if(! *p)
-      break;
+    if(strchr(PATH_TOKENS, *p))
+      ++p;
 
     if(*p == '[')
-      found = config_setting_get_elem(setting, atoi(++p));
+    {
+      char *q;
+      long index = strtol(++p, &q, 10);
+      if(*q != ']')
+        return NULL;
+
+      p = ++q;
+      found = config_setting_get_elem(found, index);
+    }
+    else if(found->type == CONFIG_TYPE_GROUP)
+    {
+      const char *q = p;
+
+      while(*q && !strchr(PATH_TOKENS, *q))
+        ++q;
+
+      found = __config_list_search(found->value.list, p, (size_t)(q - p),
+                                   NULL);
+      p = q;
+    }
     else
-      found = config_setting_get_member(setting, p);
-
-    if(! found)
       break;
-
-    setting = found;
-
-    while(! strchr(PATH_TOKENS, *p))
-      p++;
   }
 
-  return(*p ? NULL : setting);
+  return((*p || (found == setting)) ? NULL : found);
+}
+
+/* ------------------------------------------------------------------------- */
+
+config_setting_t *config_setting_lookup(const config_setting_t *setting,
+                                        const char *path)
+{
+  return((config_setting_t *)config_setting_lookup_const(setting, path));
 }
 
 /* ------------------------------------------------------------------------- */
 
 config_setting_t *config_lookup(const config_t *config, const char *path)
+{
+  return(config_setting_lookup(config->root, path));
+}
+
+/* ------------------------------------------------------------------------- */
+
+const config_setting_t *config_lookup_const(const config_t *config,
+                                            const char *path)
 {
   return(config_setting_lookup(config->root, path));
 }
@@ -1559,7 +1570,10 @@ config_setting_t *config_setting_get_member(const config_setting_t *setting,
   if(setting->type != CONFIG_TYPE_GROUP)
     return(NULL);
 
-  return(__config_list_search(setting->value.list, name, NULL));
+  if(!name)
+    return(NULL);
+
+  return(__config_list_search(setting->value.list, name, strlen(name), NULL));
 }
 
 /* ------------------------------------------------------------------------- */
@@ -1647,7 +1661,7 @@ int config_setting_remove(config_setting_t *parent, const char *name)
   const char *settingName;
   const char *lastFound;
 
-  if(! parent)
+  if(! parent || !name)
     return(CONFIG_FALSE);
 
   if(parent->type != CONFIG_TYPE_GROUP)
@@ -1670,9 +1684,11 @@ int config_setting_remove(config_setting_t *parent, const char *name)
       break;
     }
 
-  }while(*++settingName);
+  }
+  while(*++settingName);
 
-  if(!(setting = __config_list_search(setting->parent->value.list, settingName, &idx)))
+  if(!(setting = __config_list_search(setting->parent->value.list, settingName,
+                                      strlen(settingName), &idx)))
     return(CONFIG_FALSE);
 
   __config_list_remove(setting->parent->value.list, idx);
@@ -1741,7 +1757,7 @@ const char **config_default_include_func(config_t *config,
 
   if(include_dir && IS_RELATIVE_PATH(path))
   {
-    file = (char *)malloc(strlen(include_dir) + strlen(path) + 2);
+    file = (char *)libconfig_malloc(strlen(include_dir) + strlen(path) + 2);
     strcpy(file, include_dir);
     strcat(file, FILE_SEPARATOR);
     strcat(file, path);
@@ -1751,7 +1767,7 @@ const char **config_default_include_func(config_t *config,
 
   *error = NULL;
 
-  files = (const char **)malloc(sizeof(char **) * 2);
+  files = (const char **)libconfig_malloc(sizeof(char **) * 2);
   files[0] = file;
   files[1] = NULL;
 
