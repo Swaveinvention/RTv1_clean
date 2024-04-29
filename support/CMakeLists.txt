@@ -83,9 +83,11 @@ set_property( TARGET imgui PROPERTY FOLDER ${OPTIX_IDE_FOLDER} )
 option(ASSIMP_BUILD_ZLIB ON)
 option(ASSIMP_BUILD_ASSIMP_TOOLS ON)
 option(INJECT_DEBUG_POSTFIX OFF)
+#option(BUILD_SHARED_LIBS OFF)
 add_subdirectory(assimp-5.0.1)
 
 # Libconfig target
 option(BUILD_EXAMPLES OFF)
 option(BUILD_TESTS OFF)
+#option(BUILD_SHARED_LIBS OFF)
 add_subdirectory(libconfig)

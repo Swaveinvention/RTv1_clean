@@ -386,7 +386,7 @@ find_package(OptiX REQUIRED)
 # SUtil compilation
 
 # The following folders are replaced in sampleConfig.h.in using CMake's configure_file
-set(SAMPLES_DIR "${OPTIX_SDK_DIR}" INTERNAL)
+set(SAMPLES_DIR "${OPTIX_SDK_DIR}" CACHE INTERNAL "This path will be used among other for lookup of data/Textures folder.")
 set(SAMPLES_PTX_DIR "${OPTIX_PSEUDO_OUT_DIR}" CACHE PATH "Optix/CUDA pseudocode output folder" FORCE)
 set(SAMPLES_CUDA_DIR "${OPTIX_SDK_DIR}/cuda" CACHE PATH "CUDA includes provided by Optix SDK" FORCE)
 
