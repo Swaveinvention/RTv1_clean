@@ -103,6 +103,12 @@ IF(NOT PASSED_FIRST_CONFIGURE)
   set(OPTIX_PSEUDO_OUT_DIR   "${OPTIX_LIB_OUT_DIR}/ptx" CACHE PATH "Output folder for all compiled CUDA (pseudo-)code (PTX/OPTIXIR)" FORCE)
 ENDIF(NOT PASSED_FIRST_CONFIGURE)
 
+
+## Disallow in-source builds
+#if(${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_BINARY_DIR})
+#  message(ERROR "Don't perform in-source builds please. Create a separate build folder.")
+#endif()
+
 # Add paths to our CMake code to the module path, so they can be found automatically by
 # CMake.
 set(CMAKE_MODULE_PATH
